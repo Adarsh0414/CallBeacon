@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — CallBeacon</title>
+<meta name="description" content="How CallBeacon and this website handle your data.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 108 108'%3E%3Ccircle cx='54' cy='54' r='20' fill='%234F46E5'/%3E%3Ccircle cx='54' cy='54' r='9' fill='%23E2E8F0'/%3E%3Cpath d='M67,41 Q76,54 67,67' stroke='%23818CF8' stroke-width='3' fill='none'/%3E%3Cpath d='M73,35 Q85,54 73,73' stroke='%236366F1' stroke-width='2.5' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080D18;--surface:#131D30;--surface-2:#182338;
+    --line: rgba(148,163,184,0.13);--line-strong: rgba(148,163,184,0.24);
+    --indigo:#4F46E5;--indigo-light:#6366F1;--violet:#8B5CF6;--cyan:#22D3EE;
+    --text:#F3F5F9;--text-dim:#98A3B8;--text-faint:#647089;
+    --green:#10B981;--amber:#F59E0B;
+    --display:'Sora', sans-serif;--body:'Inter', sans-serif;--mono:'JetBrains Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.7;-webkit-font-smoothing:antialiased;}
+  a{color:var(--indigo-light);text-decoration:underline;text-underline-offset:2px;}
+  h1,h2,h3{font-family:var(--display);letter-spacing:-0.01em;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px;}
+  .nav{border-bottom:1px solid var(--line);padding:20px 0;position:sticky;top:0;background:rgba(8,13,24,0.85);backdrop-filter:blur(12px);z-index:10;}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;color:var(--text);text-decoration:none;font-size:1rem;}
+  .brand svg{width:24px;height:24px;}
+  .back{font-size:0.88rem;color:var(--text-dim);text-decoration:none;}
+  .back:hover{color:var(--text);}
+  main{padding:64px 0 100px;}
+  .eyebrow{font-family:var(--mono);font-size:0.74rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--indigo-light);margin-bottom:16px;display:block;}
+  h1{font-size:clamp(2rem,4vw,2.6rem);margin-bottom:12px;font-weight:700;}
+  .updated{color:var(--text-faint);font-size:0.88rem;margin-bottom:20px;font-family:var(--mono);}
+  .toc{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px 24px;margin-bottom:48px;}
+  .toc h3{font-size:0.85rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-faint);margin-bottom:12px;font-family:var(--mono);font-weight:500;}
+  .toc ol{margin-left:18px;columns:2;column-gap:24px;}
+  .toc li{margin-bottom:6px;font-size:0.88rem;}
+  .toc a{color:var(--text-dim);text-decoration:none;}
+  .toc a:hover{color:var(--indigo-light);}
+  section{margin-bottom:40px;scroll-margin-top:90px;}
+  h2{font-size:1.3rem;margin-bottom:14px;font-weight:600;}
+  h3{font-size:1.05rem;margin-bottom:10px;font-weight:600;color:var(--text);}
+  p{color:var(--text-dim);margin-bottom:14px;}
+  ul{margin:0 0 14px 20px;color:var(--text-dim);}
+  li{margin-bottom:8px;}
+  strong{color:var(--text);font-weight:600;}
+  .table{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+  .row{display:grid;grid-template-columns:160px 1fr;gap:16px;padding:16px 20px;border-bottom:1px solid var(--line);}
+  .row:last-child{border-bottom:none;}
+  .row:nth-child(odd){background:var(--surface);}
+  .row .k{font-family:var(--mono);font-size:0.85rem;color:var(--indigo-light);}
+  .row .v{color:var(--text-dim);font-size:0.92rem;}
+  .rights-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .right-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
+  .right-card h3{font-size:0.94rem;margin-bottom:6px;}
+  .right-card p{font-size:0.86rem;margin-bottom:0;}
+  .callout{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:12px;padding:16px 20px;margin-bottom:14px;}
+  .callout p{color:#6EE7B7;margin-bottom:0;font-size:0.92rem;}
+  .disclaimer{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.22);border-radius:12px;padding:16px 20px;margin-top:56px;}
+  .disclaimer p{color:#FCD34D;margin-bottom:0;font-size:0.86rem;}
+  footer{border-top:1px solid var(--line);padding:32px 0;color:var(--text-faint);font-size:0.85rem;}
+  @media(max-width:600px){.row{grid-template-columns:1fr;gap:4px;} .rights-grid{grid-template-columns:1fr;} .toc ol{columns:1;}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand">
+      <svg viewBox="0 0 108 108" fill="none"><circle cx="54" cy="54" r="20" fill="#4F46E5"/><circle cx="54" cy="54" r="9" fill="#E2E8F0"/><path d="M67,41 Q76,54 67,67" stroke="#818CF8" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M73,35 Q85,54 73,73" stroke="#6366F1" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+      CallBeacon
+    </a>
+    <a href="index.html" class="back">← Back to home</a>
+  </div>
+</nav>
+
+<main>
+  <div class="wrap">
+    <span class="eyebrow">Legal</span>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: July 7, 2026</p>
+
+    <div class="toc">
+      <h3>On this page</h3>
+      <ol>
+        <li><a href="#consent">Your consent</a></li>
+        <li><a href="#access">What the app accesses</a></li>
+        <li><a href="#dont">What we don't do</a></li>
+        <li><a href="#website">Cookies &amp; this website</a></li>
+        <li><a href="#ads">Advertising &amp; analytics</a></li>
+        <li><a href="#children">Children's privacy</a></li>
+        <li><a href="#rights">Your rights</a></li>
+        <li><a href="#retention">Data retention</a></li>
+        <li><a href="#security">Security</a></li>
+        <li><a href="#changes">Changes to this policy</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ol>
+    </div>
+
+    <section>
+      <p>This policy covers two separate things: the <strong>CallBeacon Android app</strong> ("the App"), and the <strong>website you're reading this on</strong> ("the Site"). They handle data very differently, so each is addressed on its own below.</p>
+      <div class="callout">
+        <p><strong>The short version:</strong> CallBeacon processes everything it needs — call detection, contact lookup, sending your reply — directly on your device. Nothing is uploaded to us, sold, or shared with advertisers. There's no account, no server, and no analytics inside the app itself.</p>
+      </div>
+    </section>
+
+    <section id="consent">
+      <h2>1. Your consent</h2>
+      <p>By downloading, installing, or using the App, or by browsing the Site, you agree to the handling of information described in this policy. If you don't agree with any part of it, please don't install the App, and stop using the Site — you're welcome to uninstall the App at any time, which removes all locally stored data along with it.</p>
+    </section>
+
+    <section id="access">
+      <h2>2. What the app accesses, and why</h2>
+      <p>CallBeacon requests the following Android permissions. Each is used strictly for the purpose below, on your device only:</p>
+      <div class="table">
+        <div class="row"><div class="k">SMS</div><div class="v">Used only to send the auto-reply text you've written, to the number that just called you. CallBeacon does not read your existing SMS conversations.</div></div>
+        <div class="row"><div class="k">Call log</div><div class="v">Used to detect a missed call the instant it happens, so a reply can go out in seconds.</div></div>
+        <div class="row"><div class="k">Contacts</div><div class="v">Used to look up a caller's saved name and to support Contacts-Only mode. Your contact list is never transmitted anywhere.</div></div>
+        <div class="row"><div class="k">Notifications</div><div class="v">Used to confirm a reply was sent, or alert you if one failed.</div></div>
+        <div class="row"><div class="k">Battery optimization exemption</div><div class="v">Keeps the background detection service alive so replies aren't missed while the screen is off.</div></div>
+      </div>
+      <p>Call history shown inside the App (who called, when, what was sent) is stored locally in the App's own storage on your device. Uninstalling the App removes this data — we don't hold a copy, because none is ever created outside your phone.</p>
+    </section>
+
+    <section id="dont">
+      <h2>3. What we don't do</h2>
+      <ul>
+        <li>We don't operate a server that the App reports to — there's nowhere for your on-device data to be sent.</li>
+        <li>We don't include analytics, crash-reporting, or advertising SDKs inside the App itself.</li>
+        <li>We don't sell, rent, or share on-device data with any third party.</li>
+        <li>We don't read the contents of your existing SMS inbox or call recordings.</li>
+        <li>We don't require an account, login, or profile of any kind to use the App.</li>
+      </ul>
+    </section>
+
+    <section id="website">
+      <h2>4. Cookies &amp; this website</h2>
+      <p>Separate from the App, this Site may use small text files called cookies, along with standard web-server logs, for basic functionality and reliability:</p>
+      <ul>
+        <li><strong>Hosting logs</strong> — most web hosts automatically log IP address, browser type, and pages visited for security and uptime purposes. We use this in aggregate, not to identify individuals.</li>
+        <li><strong>Essential cookies</strong> — if any are used, they support basic site functionality (like remembering you've dismissed a banner) and don't track you across other websites.</li>
+      </ul>
+      <p>Your browser likely accepts cookies by default. You can block or delete them in your browser's privacy settings at any time — doing so won't affect your ability to download or use CallBeacon. For a plain-language guide to managing cookies in any browser, see <a href="http://www.aboutcookies.org/" target="_blank" rel="noopener">aboutcookies.org</a>.</p>
+    </section>
+
+    <section id="ads">
+      <h2>5. Advertising &amp; analytics</h2>
+      <p>This Site includes a placement reserved for third-party advertising. Once a specific ad network is active, that network's own cookies and tracking practices will apply to ads shown on this page — we don't control what a third-party ad network collects, and we'll link to that network's policy here once one is in place.</p>
+      <p>If this Site ever uses a traffic-analytics tool (such as Google Analytics) to understand aggregate visitor patterns, you can manage or opt out of that tracking through the tools below:</p>
+      <ul>
+        <li><a href="https://adssettings.google.com/" target="_blank" rel="noopener">Google Ads Settings</a></li>
+        <li><a href="http://www.networkadvertising.org/choices/" target="_blank" rel="noopener">Network Advertising Initiative opt-out</a></li>
+        <li><a href="http://www.aboutads.info/choices/" target="_blank" rel="noopener">Digital Advertising Alliance opt-out</a></li>
+      </ul>
+      <p>None of this applies inside the App itself — CallBeacon does not serve ads or run analytics on your device.</p>
+    </section>
+
+    <section id="children">
+      <h2>6. Children's privacy</h2>
+      <p>CallBeacon is not directed toward children, and we don't knowingly collect personal information from children. Since the App doesn't collect data in the first place, this is largely academic for the App itself — it applies mainly to the Site. If you believe a child has provided personal information to us, contact us and we'll remove it promptly.</p>
+    </section>
+
+    <section id="rights">
+      <h2>7. Your rights</h2>
+      <p>Depending on where you live, privacy laws such as the GDPR (EU/UK) or the CCPA (California) may give you specific rights over personal information. Because the App itself doesn't collect or store anything outside your device, most of these rights are naturally already satisfied — but for anything we do hold (such as an email you've sent us), here's how they apply:</p>
+      <div class="rights-grid">
+        <div class="right-card"><h3>Access</h3><p>Ask what information we hold about you (typically limited to email correspondence you've initiated).</p></div>
+        <div class="right-card"><h3>Correction &amp; deletion</h3><p>Ask us to correct or delete information you've sent us, such as a support email.</p></div>
+        <div class="right-card"><h3>Restriction &amp; objection</h3><p>Ask us to stop processing information you've shared with us for a specific purpose.</p></div>
+        <div class="right-card"><h3>Portability</h3><p>Ask for a copy of information you've given us, in a portable format.</p></div>
+      </div>
+      <p>To exercise any of these, email <a href="mailto:adarsh.ks.tech@gmail.com">adarsh.ks.tech@gmail.com</a>. We may ask you to confirm your identity before acting on a request.</p>
+    </section>
+
+    <section id="retention">
+      <h2>8. Data retention</h2>
+      <p>Call history and templates live only on your device — you control retention entirely. Clear the App's data from Android settings, or uninstall it, and everything CallBeacon stored is gone immediately. Any email correspondence you send us is kept only as long as needed to resolve your query, unless you ask us to delete it sooner.</p>
+    </section>
+
+    <section id="security">
+      <h2>9. Security</h2>
+      <p>On-device data is kept within the App's own sandboxed storage, as enforced by Android itself. No method of storage or transmission is 100% secure, and we can't guarantee absolute security — but there's also no central database of user data to be breached, since none exists outside your phone.</p>
+    </section>
+
+    <section>
+      <h2>10. Third-party links</h2>
+      <p>This Site links to independent third-party services — including VirusTotal (to scan the APK) and GitHub. We don't control these services and aren't responsible for their content or privacy practices. Review their own policies before sharing information with them.</p>
+    </section>
+
+    <section id="changes">
+      <h2>11. Changes to this policy</h2>
+      <p>If this policy changes, we'll update the date at the top of this page. Continued use of the App or Site after a change means you accept the updated policy. We'd encourage checking back periodically if this matters to you.</p>
+    </section>
+
+    <section id="contact">
+      <h2>12. Contact</h2>
+      <p>Questions about this policy or how CallBeacon handles data:</p>
+      <ul>
+        <li>Email: <a href="mailto:adarsh.ks.tech@gmail.com">adarsh.ks.tech@gmail.com</a></li>
+        <li>GitHub: <a href="https://github.com/Adarsh0414" target="_blank" rel="noopener">github.com/Adarsh0414</a></li>
+      </ul>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>© 2026 CallBeacon. <a href="index.html">Back to home</a> · <a href="terms.html">Terms &amp; Conditions</a></p>
+  </div>
+</footer>
+</body>
+</html>

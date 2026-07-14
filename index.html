@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CallBeacon — Unavailable, not misunderstood.</title>
+<meta name="description" content="CallBeacon detects missed calls on Android and sends an automatic SMS reply in your own words — based on whether you're available, driving, or silent.">
+<meta property="og:title" content="CallBeacon — Unavailable, not misunderstood.">
+<meta property="og:description" content="Automatic SMS replies for missed calls on Android. Free APK download.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 108 108'%3E%3Ccircle cx='54' cy='54' r='20' fill='%234F46E5'/%3E%3Ccircle cx='54' cy='54' r='9' fill='%23E2E8F0'/%3E%3Cpath d='M67,41 Q76,54 67,67' stroke='%23818CF8' stroke-width='3' fill='none'/%3E%3Cpath d='M73,35 Q85,54 73,73' stroke='%236366F1' stroke-width='2.5' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080D18;
+    --bg-soft:#0D1526;
+    --surface:#131D30;
+    --surface-2:#182338;
+    --surface-3:#1F2C45;
+    --line: rgba(148,163,184,0.12);
+    --line-strong: rgba(148,163,184,0.24);
+    --indigo:#4F46E5;
+    --indigo-light:#6366F1;
+    --violet:#8B5CF6;
+    --cyan:#22D3EE;
+    --indigo-glow: rgba(99,102,241,0.38);
+    --text:#F3F5F9;
+    --text-dim:#98A3B8;
+    --text-faint:#647089;
+    --green:#10B981;
+    --green-glow: rgba(16,185,129,0.35);
+    --amber:#F59E0B;
+    --amber-glow: rgba(245,158,11,0.35);
+    --red:#EF4444;
+    --red-glow: rgba(239,68,68,0.4);
+    --radius-lg:22px;
+    --radius:16px;
+    --radius-sm:10px;
+    --maxw:1200px;
+    --display:'Sora', sans-serif;
+    --body:'Inter', sans-serif;
+    --mono:'JetBrains Mono', monospace;
+    --ease: cubic-bezier(.16,.84,.44,1);
+    --ease-spring: cubic-bezier(.34,1.56,.64,1);
+    --sp-section: clamp(72px, 11vw, 152px);
+    --sp-head: clamp(44px, 6vw, 68px);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img,svg{display:block;max-width:100%;}
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,48px);}
+  section{position:relative;}
+  h1,h2,h3,h4{font-family:var(--display);letter-spacing:-0.015em;font-weight:600;}
+  :focus-visible{outline:2px solid var(--indigo-light);outline-offset:3px;border-radius:6px;}
+  em{font-style:normal;color:var(--text);}
+
+  .grad-text{
+    background:linear-gradient(95deg, var(--indigo-light) 10%, var(--violet) 55%, var(--cyan) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  /* ---------- Scroll reveal (blur-fade) ---------- */
+  .reveal{opacity:0;transform:translateY(26px) scale(.985);filter:blur(7px);transition:opacity .85s var(--ease), transform .85s var(--ease), filter .85s var(--ease);}
+  .reveal.in{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+  .reveal-stagger.in > *{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+  .reveal-stagger > *{opacity:0;transform:translateY(22px) scale(.97);filter:blur(6px);transition:opacity .7s var(--ease), transform .7s var(--ease), filter .7s var(--ease);}
+  .reveal-stagger.in > *:nth-child(1){transition-delay:.03s;}
+  .reveal-stagger.in > *:nth-child(2){transition-delay:.11s;}
+  .reveal-stagger.in > *:nth-child(3){transition-delay:.19s;}
+  .reveal-stagger.in > *:nth-child(4){transition-delay:.27s;}
+  .reveal-stagger.in > *:nth-child(5){transition-delay:.35s;}
+  .reveal-stagger.in > *:nth-child(6){transition-delay:.43s;}
+  .reveal-stagger.in > *:nth-child(7){transition-delay:.51s;}
+  .reveal-stagger.in > *:nth-child(8){transition-delay:.59s;}
+  @media (prefers-reduced-motion: reduce){
+    .reveal,.reveal-stagger > *{opacity:1 !important;transform:none !important;filter:none !important;transition:none !important;}
+  }
+
+  /* ---------- Backgrounds ---------- */
+  .bg-grid{
+    position:fixed;inset:0;z-index:-3;
+    background:
+      radial-gradient(circle at 14% 8%, rgba(99,102,241,0.16) 0%, transparent 32%),
+      radial-gradient(circle at 86% 26%, rgba(139,92,246,0.11) 0%, transparent 34%),
+      radial-gradient(circle at 22% 90%, rgba(16,185,129,0.07) 0%, transparent 30%);
+    pointer-events:none;
+  }
+  .bg-dots{
+    position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:0.55;
+    background-image:radial-gradient(rgba(148,163,184,0.13) 1px, transparent 1px);
+    background-size:28px 28px;
+    mask-image:linear-gradient(to bottom, transparent, rgba(0,0,0,0.5) 8%, rgba(0,0,0,0.5) 92%, transparent);
+  }
+  .aurora{position:absolute;inset:-15% -8%;z-index:0;pointer-events:none;filter:blur(64px);opacity:0.6;overflow:hidden;}
+  .aurora span{position:absolute;border-radius:50%;}
+  .aurora span:nth-child(1){width:440px;height:440px;background:radial-gradient(circle, var(--indigo) 0%, transparent 72%);top:-100px;left:-80px;animation:auroraA 20s ease-in-out infinite;}
+  .aurora span:nth-child(2){width:380px;height:380px;background:radial-gradient(circle, var(--violet) 0%, transparent 72%);top:60px;right:-120px;animation:auroraB 24s ease-in-out infinite;}
+  .aurora span:nth-child(3){width:320px;height:320px;background:radial-gradient(circle, var(--cyan) 0%, transparent 72%);bottom:-140px;left:32%;animation:auroraC 27s ease-in-out infinite;}
+  @keyframes auroraA{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(70px,50px) scale(1.18);}}
+  @keyframes auroraB{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-60px,60px) scale(1.12);}}
+  @keyframes auroraC{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(40px,-40px) scale(1.2);}}
+  @media (prefers-reduced-motion: reduce){.aurora span{animation:none;}}
+
+  /* ---------- Spotlight cards ---------- */
+  .spot-card{position:relative;isolation:isolate;}
+  .spot-card::before{
+    content:'';position:absolute;inset:0;border-radius:inherit;z-index:0;
+    background:radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(99,102,241,0.16), transparent 60%);
+    opacity:0;transition:opacity .35s var(--ease);pointer-events:none;
+  }
+  .spot-card:hover::before{opacity:1;}
+  .spot-card > *{position:relative;z-index:1;}
+
+  /* ---------- Floating pill nav ---------- */
+  .nav-shell{position:fixed;top:16px;left:50%;transform:translateX(-50%);width:min(94%, 1200px);z-index:100;}
+  .nav{
+    border-radius:100px;background:rgba(10,16,28,0.66);backdrop-filter:blur(18px) saturate(1.4);
+    border:1px solid var(--line-strong);box-shadow:0 12px 34px -14px rgba(0,0,0,0.55);
+    transition:background .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease);
+  }
+  .nav-shell.scrolled .nav{background:rgba(8,13,24,0.88);box-shadow:0 16px 40px -16px rgba(0,0,0,0.7);}
+  .nav .nav-row{display:flex;align-items:center;justify-content:space-between;height:64px;padding:0 10px 0 22px;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:1.02rem;}
+  .brand svg{width:26px;height:26px;}
+  .nav-links{display:flex;align-items:center;gap:2px;}
+  .nav-links a{font-size:0.89rem;color:var(--text-dim);transition:color .18s;padding:9px 15px;border-radius:100px;position:relative;}
+  .nav-links a:hover{color:var(--text);background:rgba(148,163,184,0.07);}
+  .nav-links a.active{color:var(--text);background:rgba(99,102,241,0.14);}
+  .nav-cta{
+    background:linear-gradient(135deg, var(--indigo), var(--violet));color:#fff;padding:10px 22px;border-radius:100px;
+    font-size:0.86rem;font-weight:600;transition:transform .2s var(--ease), box-shadow .2s var(--ease);
+    display:inline-block;box-shadow:0 4px 18px -6px var(--indigo-glow);margin-left:10px;
+  }
+  .nav-cta:hover{transform:translateY(-1px);box-shadow:0 8px 22px -6px var(--indigo-glow);}
+  .nav-right{display:flex;align-items:center;gap:10px;}
+  .burger{display:none;width:34px;height:34px;flex-direction:column;justify-content:center;align-items:center;gap:5px;}
+  .burger span{display:block;height:2px;width:18px;background:var(--text);border-radius:2px;transition:transform .25s var(--ease), opacity .25s var(--ease);}
+  .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+  .burger.open span:nth-child(2){opacity:0;}
+  .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+  .mobile-menu{
+    max-height:0;overflow:hidden;margin-top:8px;border-radius:22px;
+    background:rgba(10,16,28,0.92);backdrop-filter:blur(18px);border:1px solid var(--line-strong);
+    transition:max-height .32s var(--ease);
+  }
+  .mobile-menu-inner{display:flex;flex-direction:column;padding:6px 22px 12px;}
+  .mobile-menu a{padding:14px 0;color:var(--text-dim);border-bottom:1px solid var(--line);font-size:0.96rem;}
+  .mobile-menu a:last-child{border-bottom:none;}
+  .mobile-menu.open{max-height:400px;}
+
+  /* ---------- Eyebrow ---------- */
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:0.73rem;letter-spacing:0.07em;text-transform:uppercase;
+    color:var(--indigo-light);background:rgba(99,102,241,0.09);border:1px solid rgba(99,102,241,0.24);
+    padding:7px 15px;border-radius:100px;margin-bottom:26px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-glow);}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:clamp(132px,16vw,164px) 0 clamp(56px,8vw,80px);overflow:hidden;}
+  .hero .wrap{display:grid;grid-template-columns:1.05fr 0.95fr;gap:clamp(32px,6vw,64px);align-items:center;position:relative;z-index:1;}
+  .hero h1{font-size:clamp(2.5rem, 4.6vw, 4.1rem);line-height:1.05;margin-bottom:26px;font-weight:700;}
+  .hero p.lead{font-size:clamp(1.02rem,1.3vw,1.18rem);color:var(--text-dim);max-width:500px;margin-bottom:36px;}
+  .btn-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;padding:16px 28px;border-radius:12px;font-weight:600;font-size:0.98rem;
+    transition:transform .25s var(--ease), box-shadow .25s var(--ease), background .25s var(--ease);
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{
+    background:linear-gradient(135deg, var(--indigo), var(--violet));color:#fff;
+    box-shadow:0 12px 30px -10px var(--indigo-glow);position:relative;overflow:hidden;
+  }
+  .btn-primary::after{
+    content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,0.28), transparent);
+    transform:skewX(-20deg);transition:left .65s var(--ease);
+  }
+  .btn-primary:hover::after{left:130%;}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px -10px var(--indigo-glow);}
+  .btn-ghost{background:rgba(148,163,184,0.06);color:var(--text);border:1px solid var(--line-strong);}
+  .btn-ghost:hover{border-color:rgba(148,163,184,0.45);transform:translateY(-2px);background:rgba(148,163,184,0.1);}
+  .hero-note{font-size:0.84rem;color:var(--text-faint);margin-bottom:28px;}
+  .hero-note a{color:var(--indigo-light);border-bottom:1px dotted rgba(99,102,241,0.5);}
+  .meta-chips{display:flex;gap:10px;flex-wrap:wrap;}
+  .chip{font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);background:rgba(148,163,184,0.06);border:1px solid var(--line);padding:7px 13px;border-radius:8px;}
+
+  /* ---------- Phone mockup (realistic device frame) ---------- */
+  .phone-stage{display:flex;justify-content:center;position:relative;animation:floatY 6.5s ease-in-out infinite;}
+  @keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+  @media (prefers-reduced-motion: reduce){.phone-stage{animation:none;}}
+  .signal-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:0;pointer-events:none;}
+  .signal-rings svg{width:600px;height:600px;opacity:0.45;}
+  .signal-rings circle{animation:ringExpand 4.5s var(--ease) infinite;}
+  .signal-rings circle:nth-child(2){animation-delay:1.1s;}
+  .signal-rings circle:nth-child(3){animation-delay:2.2s;}
+  @keyframes ringExpand{0%{opacity:0.55;stroke-width:1.4;}100%{transform:scale(1.34);opacity:0;stroke-width:0.4;}}
+  @media (prefers-reduced-motion: reduce){.signal-rings circle{animation:none;opacity:0.12;}}
+  .phone-tilt{transition:transform .25s var(--ease);will-change:transform;position:relative;z-index:1;}
+
+  .phone{
+    width:272px;height:556px;border-radius:44px;
+    background:linear-gradient(155deg, #2A3752, #101827 60%, #0B1220);
+    border:1px solid rgba(148,163,184,0.22);
+    box-shadow:0 44px 100px -26px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 1px rgba(255,255,255,0.08);
+    padding:6px;position:relative;
+  }
+  .phone::before{content:'';position:absolute;right:-2px;top:118px;width:3px;height:58px;background:linear-gradient(180deg,#3A4A6B,#1B2537);border-radius:2px 0 0 2px;}
+  .phone::after{content:'';position:absolute;left:-2px;top:96px;width:3px;height:38px;background:linear-gradient(180deg,#3A4A6B,#1B2537);border-radius:0 2px 2px 0;}
+  .phone-vol2{position:absolute;left:-2px;top:142px;width:3px;height:38px;background:linear-gradient(180deg,#3A4A6B,#1B2537);border-radius:0 2px 2px 0;}
+  .phone-inner{width:100%;height:100%;border-radius:38px;background:var(--bg-soft);overflow:hidden;position:relative;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.4);}
+  .phone-camera{position:absolute;top:15px;left:50%;transform:translateX(-50%);width:11px;height:11px;border-radius:50%;background:#050810;box-shadow:inset 0 0 0 1.5px rgba(148,163,184,0.18), inset 0 0 3px rgba(0,0,0,0.6);z-index:6;}
+  .phone-sheen{position:absolute;inset:0;z-index:5;pointer-events:none;background:linear-gradient(122deg, rgba(255,255,255,0.05) 0%, transparent 22%, transparent 78%, rgba(255,255,255,0.03) 100%);}
+
+  .status-bar{position:relative;z-index:4;display:flex;align-items:center;justify-content:space-between;padding:14px 20px 0;font-family:var(--mono);font-size:0.72rem;color:var(--text);}
+  .status-icons{display:flex;align-items:center;gap:5px;color:var(--text);}
+  .status-icons svg{display:block;}
+
+  .beacon-row{position:relative;z-index:4;display:flex;justify-content:center;padding:10px 16px 0;height:34px;}
+  .beacon-chip{
+    position:absolute;top:8px;left:50%;transform:translateX(-50%);
+    display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.05);
+    border:1px solid var(--line-strong);padding:6px 14px;border-radius:100px;
+    font-family:var(--mono);font-size:0.7rem;letter-spacing:.02em;white-space:nowrap;backdrop-filter:blur(6px);
+  }
+  .beacon-dot{width:7px;height:7px;border-radius:50%;position:relative;flex-shrink:0;}
+  .beacon-dot::after{content:'';position:absolute;inset:-4px;border-radius:50%;}
+  .beacon-dot.pulse::after{animation:beaconPulseRing 1.8s infinite;}
+  @keyframes beaconPulseRing{0%{box-shadow:0 0 0 0 rgba(239,68,68,0.45);}100%{box-shadow:0 0 0 8px rgba(239,68,68,0);}}
+
+  .phase-call{animation:phaseCall 9s infinite;}
+  .phase-sending{animation:phaseSending 9s infinite;}
+  .phase-sms{animation:phaseSms 9s infinite;}
+  .beacon-call{animation:phaseCall 9s infinite;}
+  .beacon-sending{animation:phaseSending 9s infinite;}
+  .beacon-sms{animation:phaseSms 9s infinite;}
+  @keyframes phaseCall{0%,26%{opacity:1;transform:translateY(0) scale(1);}32%,100%{opacity:0;transform:translateY(-6px) scale(0.97);}}
+  @keyframes phaseSending{0%,28%{opacity:0;transform:translateY(8px) scale(0.97);}34%,42%{opacity:1;transform:translateY(0) scale(1);}48%,100%{opacity:0;transform:translateY(-6px) scale(0.97);}}
+  @keyframes phaseSms{0%,44%{opacity:0;transform:translateY(8px) scale(0.97);}50%,88%{opacity:1;transform:translateY(0) scale(1);}96%,100%{opacity:0;transform:translateY(0) scale(1);}}
+
+  .screen-content{position:relative;z-index:3;height:calc(100% - 66px);}
+  .screen-frame{position:absolute;inset:0;padding:22px 20px 20px;display:flex;flex-direction:column;align-items:center;}
+  .call-avatar{width:72px;height:72px;border-radius:50%;margin:8px auto 18px;background:var(--surface-3);display:flex;align-items:center;justify-content:center;border:1px solid var(--line);}
+  .call-label{text-align:center;color:var(--text-dim);font-size:0.85rem;margin-bottom:4px;}
+  .call-number{text-align:center;font-family:var(--mono);font-size:1.02rem;margin-bottom:34px;}
+  .call-status{text-align:center;font-size:0.76rem;color:var(--red);font-family:var(--mono);letter-spacing:.03em;}
+  .call-buttons{display:flex;justify-content:center;gap:65px;margin-top:auto;margin-bottom:6px;}
+  .call-btn{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px -6px rgba(0,0,0,0.5);}
+  .call-btn.decline{background:linear-gradient(155deg,#F87171,var(--red));}
+  .call-btn.accept{background:linear-gradient(155deg,#34D399,var(--green));}
+
+  .sending-card{margin:auto;text-align:center;}
+  .sending-dots{display:flex;justify-content:center;gap:6px;margin-bottom:16px;}
+  .sending-dots span{width:8px;height:8px;border-radius:50%;background:var(--amber);animation:dotPulse 1.1s infinite;}
+  .sending-dots span:nth-child(2){animation-delay:.15s;}
+  .sending-dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes dotPulse{0%,80%,100%{opacity:.25;transform:scale(0.85);}40%{opacity:1;transform:scale(1);}}
+  .sending-card p{font-family:var(--mono);font-size:0.78rem;color:var(--text-dim);}
+
+  .sms-header{display:flex;align-items:center;gap:10px;color:var(--text-dim);font-size:0.8rem;margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:13px;width:100%;}
+  .sms-bubble{background:linear-gradient(135deg, var(--indigo), var(--violet));color:#fff;border-radius:15px 15px 4px 15px;padding:12px 14px;font-size:0.83rem;max-width:92%;margin-left:auto;box-shadow:0 8px 20px -8px var(--indigo-glow);width:100%;}
+  .sms-time{font-family:var(--mono);font-size:0.66rem;color:var(--text-dim);text-align:right;margin-top:8px;width:100%;}
+  .sms-sent-tag{display:flex;align-items:center;gap:6px;margin-top:auto;color:var(--green);font-size:0.74rem;font-family:var(--mono);}
+  @media (prefers-reduced-motion: reduce){
+    .phase-call,.phase-sending,.phase-sms,.beacon-call,.beacon-sending,.beacon-sms,.beacon-dot.pulse::after{animation:none !important;}
+    .phase-sms,.beacon-sms{opacity:1;} .phase-call,.phase-sending,.beacon-call,.beacon-sending{display:none;}
+  }
+
+  /* ---------- Section shell ---------- */
+  .section{padding:var(--sp-section) 0;}
+  .section-head{max-width:640px;margin-bottom:var(--sp-head);}
+  .section-head.center{margin-left:auto;margin-right:auto;text-align:center;}
+  .section-head h2{font-size:clamp(1.9rem,3vw,2.6rem);margin-bottom:16px;font-weight:700;}
+  .section-head p{color:var(--text-dim);font-size:1.05rem;}
+  .divider{height:1px;background:linear-gradient(90deg, transparent, var(--line-strong), transparent);width:100%;}
+
+  /* ---------- Problem / Solution ---------- */
+  .ps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;}
+  .ps-card{border-radius:var(--radius-lg);padding:clamp(28px,3vw,38px);border:1px solid var(--line);background:var(--surface);overflow:hidden;transition:transform .35s var(--ease), border-color .35s var(--ease);}
+  .ps-card:hover{transform:translateY(-4px);}
+  .ps-card.problem{box-shadow:inset 0 0 0 1px rgba(239,68,68,0.14);}
+  .ps-card.solution{box-shadow:inset 0 0 0 1px rgba(16,185,129,0.16);}
+  .ps-tag{font-family:var(--mono);font-size:0.74rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:18px;display:inline-block;}
+  .ps-card.problem .ps-tag{color:var(--red);}
+  .ps-card.solution .ps-tag{color:var(--green);}
+  .ps-card h3{font-size:1.4rem;margin-bottom:14px;}
+  .ps-card p{color:var(--text-dim);}
+
+  /* ---------- Moments / storytelling ---------- */
+  .moments-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;}
+  .moment-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:clamp(26px,3vw,34px);transition:transform .35s var(--ease), border-color .35s var(--ease);}
+  .moment-card:hover{transform:translateY(-5px);border-color:rgba(99,102,241,0.35);}
+  .moment-tag{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:0.72rem;letter-spacing:.05em;text-transform:uppercase;color:var(--indigo-light);margin-bottom:18px;}
+  .moment-tag .sw{width:7px;height:7px;border-radius:50%;}
+  .moment-card h3{font-size:1.2rem;margin-bottom:12px;line-height:1.32;font-weight:700;}
+  .moment-card p{color:var(--text-dim);font-size:0.95rem;margin-bottom:18px;}
+  .moment-reply{display:flex;gap:10px;align-items:flex-start;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:0.85rem;color:var(--text);}
+  .moment-reply svg{flex-shrink:0;margin-top:2px;color:var(--green);}
+
+  /* ---------- Features ---------- */
+  .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;}
+  .feat-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px 24px;transition:transform .3s var(--ease), border-color .3s var(--ease);}
+  .feat-card:hover{transform:translateY(-5px);border-color:rgba(99,102,241,0.4);}
+  .feat-icon{width:44px;height:44px;border-radius:12px;background:rgba(99,102,241,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:18px;color:var(--indigo-light);}
+  .feat-card h3{font-size:1.04rem;margin-bottom:9px;font-family:var(--body);font-weight:600;}
+  .feat-card p{font-size:0.89rem;color:var(--text-dim);}
+
+  /* ---------- How it works — timeline ---------- */
+  .timeline{position:relative;display:flex;flex-direction:column;gap:clamp(30px,4vw,46px);max-width:760px;}
+  .timeline::before{content:'';position:absolute;left:21px;top:10px;bottom:10px;width:1.5px;background:linear-gradient(180deg, var(--indigo-light), rgba(99,102,241,0.35), transparent);}
+  .timeline-item{display:flex;gap:clamp(18px,3vw,28px);position:relative;}
+  .timeline-node{
+    flex-shrink:0;width:44px;height:44px;border-radius:50%;background:var(--surface-3);
+    border:1px solid var(--line-strong);display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:0.85rem;color:var(--indigo-light);position:relative;z-index:1;
+    box-shadow:0 0 0 5px var(--bg), 0 0 18px -2px var(--indigo-glow);
+  }
+  .timeline-item:first-child .timeline-node{background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff;border-color:transparent;}
+  .timeline-content{padding-top:6px;flex:1;max-width:560px;}
+  .timeline-content h3{font-size:1.08rem;margin-bottom:8px;font-family:var(--body);font-weight:600;}
+  .timeline-content p{font-size:0.92rem;color:var(--text-dim);}
+  .step-callout{
+    display:flex;align-items:flex-start;gap:8px;margin-top:14px;padding:12px 14px;border-radius:10px;
+    background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.22);font-size:0.82rem;color:#FCD34D;
+  }
+  .step-callout svg{flex-shrink:0;margin-top:2px;color:var(--amber);}
+  .step-callout a{color:#FCD34D;text-decoration:underline;text-underline-offset:2px;}
+
+  /* ---------- Screenshots / demo (real screenshots in realistic phone frames) ---------- */
+  .tour-note{font-size:0.86rem;color:var(--text-dim);margin-bottom:var(--sp-head);}
+  .tour-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:clamp(28px,4vw,40px);max-width:920px;margin:0 auto;}
+  .tour-card{text-align:center;}
+  .screenshot-phone{width:100%;max-width:224px;margin:0 auto 22px;position:relative;transition:transform .35s var(--ease);}
+  .tour-card:hover .screenshot-phone{transform:translateY(-6px);}
+  .screenshot-phone-frame{
+    border-radius:34px;padding:6px;position:relative;
+    background:linear-gradient(155deg, #2A3752, #101827 60%, #0B1220);
+    border:1px solid rgba(148,163,184,0.22);
+    box-shadow:0 30px 70px -22px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 1px rgba(255,255,255,0.08);
+    transition:border-color .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .tour-card:hover .screenshot-phone-frame{border-color:rgba(99,102,241,0.4);box-shadow:0 34px 78px -20px rgba(99,102,241,0.22);}
+  .screenshot-phone-frame::before{content:'';position:absolute;right:-2px;top:92px;width:2.5px;height:44px;background:linear-gradient(180deg,#3A4A6B,#1B2537);border-radius:2px 0 0 2px;}
+  .screenshot-phone-frame::after{content:'';position:absolute;left:-2px;top:76px;width:2.5px;height:30px;background:linear-gradient(180deg,#3A4A6B,#1B2537);border-radius:0 2px 2px 0;}
+  .screenshot-phone-inner{border-radius:28px;overflow:hidden;position:relative;background:#000;aspect-ratio:575/1280;}
+  .screenshot-phone-inner img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;}
+  .screenshot-phone-camera{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:#050810;box-shadow:inset 0 0 0 1.3px rgba(148,163,184,0.2), inset 0 0 3px rgba(0,0,0,0.6);z-index:6;}
+  .screenshot-phone-sheen{position:absolute;inset:0;z-index:5;pointer-events:none;background:linear-gradient(122deg, rgba(255,255,255,0.05) 0%, transparent 22%, transparent 78%, rgba(255,255,255,0.03) 100%);}
+  .tour-card p.caption{color:var(--text-dim);font-size:0.9rem;}
+  .tour-card h3{font-size:1.05rem;margin-bottom:6px;font-family:var(--body);font-weight:600;}
+
+  /* ---------- Permissions ---------- */
+  .perm-list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:16px;overflow:hidden;}
+  .perm-row{display:grid;grid-template-columns:200px 1fr;gap:24px;padding:22px 26px;border-bottom:1px solid var(--line);align-items:start;}
+  .perm-row:last-child{border-bottom:none;}
+  .perm-row:nth-child(odd){background:var(--surface);}
+  .perm-name{font-family:var(--mono);font-size:0.88rem;color:var(--indigo-light);display:flex;align-items:center;gap:10px;}
+  .perm-desc{color:var(--text-dim);font-size:0.93rem;}
+  .perm-banner{display:flex;align-items:center;gap:14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:14px;padding:18px 22px;margin-bottom:28px;}
+  .perm-banner svg{flex-shrink:0;color:var(--amber);}
+  .perm-banner p{font-size:0.9rem;color:#FCD34D;}
+  .perm-banner a{color:#fff;text-decoration:underline;text-underline-offset:2px;font-weight:600;}
+
+  @media(max-width:700px){.perm-row{grid-template-columns:1fr;gap:8px;}}
+
+  /* ---------- Restricted settings fix ---------- */
+  .fix-section{background:linear-gradient(180deg, rgba(245,158,11,0.05), transparent);}
+  .fix-intro{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:48px;align-items:center;margin-bottom:var(--sp-head);}
+  .error-recreation{background:var(--surface-3);border:1px solid var(--line-strong);border-radius:20px;padding:30px 26px;box-shadow:0 24px 60px -20px rgba(0,0,0,0.5);}
+  .error-shield{width:46px;height:46px;border-radius:50%;background:rgba(239,68,68,0.14);display:flex;align-items:center;justify-content:center;color:var(--red);margin-bottom:18px;}
+  .error-recreation h4{font-size:1.15rem;margin-bottom:12px;}
+  .error-recreation p{color:var(--text-dim);font-size:0.9rem;margin-bottom:10px;}
+  .error-recreation .caption-label{font-family:var(--mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);margin-bottom:14px;display:block;}
+  .fix-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px;}
+  .fix-step{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:28px 26px;transition:transform .3s var(--ease), border-color .3s var(--ease);}
+  .fix-step:hover{transform:translateY(-4px);border-color:rgba(99,102,241,0.3);}
+  .fix-step-num{width:32px;height:32px;border-radius:50%;background:rgba(99,102,241,0.14);color:var(--indigo-light);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.85rem;margin-bottom:20px;}
+  .fix-step h4{font-size:1.02rem;margin-bottom:10px;font-family:var(--body);font-weight:600;}
+  .fix-step p{font-size:0.89rem;color:var(--text-dim);margin-bottom:16px;}
+  .mock-settings-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:0.82rem;}
+  .mock-settings-row .menu-dots{font-family:var(--mono);color:var(--indigo-light);letter-spacing:2px;}
+  .mock-toggle-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:0.82rem;}
+  .mock-toggle{width:38px;height:20px;border-radius:100px;background:var(--indigo);position:relative;flex-shrink:0;}
+  .mock-toggle::after{content:'';position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:#fff;}
+  .mock-dropdown{background:var(--bg-soft);border:1px solid var(--line-strong);border-radius:10px;padding:10px 0;font-size:0.8rem;}
+  .mock-dropdown div{padding:9px 14px;}
+  .mock-dropdown div.highlight{background:rgba(99,102,241,0.14);color:var(--indigo-light);font-weight:500;}
+
+  /* ---------- Advertisement ---------- */
+  .ad-slot{border:1px dashed rgba(148,163,184,0.3);border-radius:14px;padding:26px;text-align:center;color:var(--text-dim);background:rgba(148,163,184,0.04);}
+  .ad-slot .ad-label{font-family:var(--mono);font-size:0.68rem;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:10px;opacity:0.7;}
+  .ad-inner{min-height:90px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;border-radius:10px;background:var(--surface);}
+
+  /* ---------- FAQ ---------- */
+  .faq-list{border-top:1px solid var(--line);}
+  .faq-item{border-bottom:1px solid var(--line);}
+  .faq-q{width:100%;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:23px 4px;text-align:left;font-size:1.01rem;font-weight:500;transition:color .18s;}
+  .faq-q:hover{color:var(--indigo-light);}
+  .faq-q .plus{font-family:var(--mono);color:var(--indigo-light);font-size:1.25rem;transition:transform .3s var(--ease);flex-shrink:0;}
+  .faq-item.open .plus{transform:rotate(45deg);}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .35s var(--ease);}
+  .faq-a p{color:var(--text-dim);padding:0 4px 23px;font-size:0.95rem;max-width:760px;}
+  .faq-a a{color:var(--indigo-light);text-decoration:underline;text-underline-offset:2px;}
+
+  /* ---------- Download ---------- */
+  .dl-card{background:linear-gradient(135deg, var(--surface-3), var(--surface));border:1px solid var(--line-strong);border-radius:26px;padding:clamp(32px,5vw,52px);display:grid;grid-template-columns:1fr auto;gap:44px;align-items:center;position:relative;overflow:hidden;}
+  .dl-specs{display:grid;grid-template-columns:repeat(3,auto);gap:30px;margin:24px 0 28px;}
+  .dl-spec-label{font-size:0.74rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .dl-spec-val{font-family:var(--mono);font-size:1.04rem;}
+  .release-notes{font-size:0.89rem;color:var(--text-dim);max-width:480px;}
+  .release-notes strong{color:var(--text);}
+  .dl-android-note{display:flex;align-items:center;gap:8px;font-size:0.82rem;color:var(--text-dim);margin-top:20px;}
+  .dl-android-note a{color:var(--indigo-light);text-decoration:underline;text-underline-offset:2px;}
+  @media(max-width:820px){.dl-card{grid-template-columns:1fr;text-align:left;} .dl-specs{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:480px){.dl-specs{grid-template-columns:1fr 1fr;}}
+
+  /* ---------- About / Contact ---------- */
+  .about-grid{display:grid;grid-template-columns:1.2fr 0.8fr;gap:52px;}
+  .about-grid p{color:var(--text-dim);margin-bottom:18px;}
+  .about-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:30px;}
+  .about-card h3{font-size:1.02rem;margin-bottom:18px;font-family:var(--body);font-weight:600;}
+  .contact-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);font-size:0.93rem;}
+  .contact-row:last-child{border-bottom:none;}
+  .contact-row a{color:var(--indigo-light);}
+  @media(max-width:800px){.about-grid{grid-template-columns:1fr;}}
+
+  /* ---------- Footer ---------- */
+  footer{border-top:1px solid var(--line);padding:52px 0 34px;}
+  .foot-grid{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:24px;margin-bottom:30px;}
+  .foot-links{display:flex;gap:28px;flex-wrap:wrap;}
+  .foot-links a{color:var(--text-dim);font-size:0.9rem;}
+  .foot-links a:hover{color:var(--text);}
+  .foot-social{display:flex;gap:14px;}
+  .foot-social a{width:38px;height:38px;border:1px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-dim);transition:border-color .2s, color .2s;}
+  .foot-social a:hover{border-color:var(--indigo-light);color:var(--indigo-light);}
+  .foot-bottom{color:var(--text-dim);font-size:0.82rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+
+  /* ---------- Responsive layout shifts ---------- */
+  @media (max-width:900px){
+    .nav-links{display:none;}
+    .burger{display:flex;}
+    .nav-cta{display:none;}
+    .hero .wrap{grid-template-columns:1fr;}
+    .phone-stage{order:-1;margin-bottom:8px;}
+  }
+  @media (max-width:560px){
+    .wrap{padding:0 18px;}
+    .nav-shell{width:96%;top:10px;}
+    .nav .nav-row{padding:0 8px 0 16px;}
+  }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-dots"></div>
+
+<!-- ============ NAV ============ -->
+<div class="nav-shell" id="navShell">
+  <nav class="nav">
+    <div class="nav-row">
+      <a href="#home" class="brand">
+        <svg viewBox="0 0 108 108" fill="none"><circle cx="54" cy="54" r="20" fill="#4F46E5"/><circle cx="54" cy="54" r="9" fill="#E2E8F0"/><path d="M67,41 Q76,54 67,67" stroke="#818CF8" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M73,35 Q85,54 73,73" stroke="#6366F1" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+        CallBeacon
+      </a>
+      <div class="nav-right">
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#home" data-nav>Home</a></li>
+          <li><a href="#features" data-nav>Features</a></li>
+          <li><a href="#screenshots" data-nav>Screenshots</a></li>
+          <li><a href="#faq" data-nav>FAQ</a></li>
+          <li><a href="#download" data-nav>Download</a></li>
+          <li><a href="#contact" data-nav>Contact</a></li>
+        </ul>
+        <a href="#download" class="nav-cta">Get APK</a>
+        <button class="burger" id="burger" aria-label="Toggle menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-inner">
+      <a href="#home">Home</a>
+      <a href="#features">Features</a>
+      <a href="#screenshots">Screenshots</a>
+      <a href="#faq">FAQ</a>
+      <a href="#download">Download</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="home">
+  <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="wrap">
+    <div>
+      <span class="eyebrow"><span class="dot"></span> For Android · Free to download</span>
+      <h1>Unavailable, <span class="grad-text">not misunderstood.</span></h1>
+      <p class="lead">CallBeacon watches for the calls you miss and replies for you — instantly, automatically, in your own words. No more callers left guessing why you didn't pick up.</p>
+      <div class="btn-row">
+        <a href="#download" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download APK
+        </a>
+        <a href="#how-it-works" class="btn btn-ghost">See how it works</a>
+      </div>
+      <p class="hero-note">On Android 13 and up, one extra tap is needed to allow SMS access. <a href="#restricted-settings">Here's exactly where to find it →</a></p>
+      <div class="meta-chips">
+        <span class="chip">v1.0.0</span>
+        <span class="chip">6.4 MB</span>
+        <span class="chip">Android 8.0+</span>
+        <span class="chip">📡 No internet needed</span>
+      </div>
+    </div>
+    <div class="phone-stage" id="phoneStage">
+      <div class="signal-rings" aria-hidden="true">
+        <svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="60" fill="none" stroke="#6366F1" stroke-width="1"/><circle cx="100" cy="100" r="60" fill="none" stroke="#6366F1" stroke-width="1"/><circle cx="100" cy="100" r="60" fill="none" stroke="#6366F1" stroke-width="1"/></svg>
+      </div>
+      <div class="phone-tilt" id="phoneTilt">
+        <div class="phone">
+          <div class="phone-vol2"></div>
+          <div class="phone-inner">
+            <div class="phone-camera"></div>
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="status-icons">
+                <svg width="15" height="11" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="0.5"/><rect x="4.5" y="5" width="3" height="7" rx="0.5"/><rect x="9" y="2.5" width="3" height="9.5" rx="0.5"/><rect x="13.5" y="0" width="3" height="12" rx="0.5" opacity="0.4"/></svg>
+                <svg width="13" height="10" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1 4.5a10 10 0 0 1 14 0M3.8 7.3a6 6 0 0 1 8.4 0M6.6 10a2 2 0 0 1 2.8 0"/></svg>
+                <svg width="18" height="10" viewBox="0 0 24 12" fill="none"><rect x="0.5" y="0.5" width="20" height="11" rx="2.5" stroke="currentColor" stroke-width="1"/><rect x="21.5" y="4" width="1.5" height="4" rx="0.5" fill="currentColor"/><rect x="2" y="2" width="16" height="8" rx="1" fill="currentColor"/></svg>
+              </div>
+            </div>
+            <div class="beacon-row">
+              <span class="beacon-chip beacon-call"><span class="beacon-dot pulse" style="background:var(--red);"></span><span style="color:var(--red);">Silent mode</span></span>
+              <span class="beacon-chip beacon-sending"><span class="beacon-dot" style="background:var(--amber);"></span><span style="color:var(--amber);">Sending…</span></span>
+              <span class="beacon-chip beacon-sms"><span class="beacon-dot" style="background:var(--green);"></span><span style="color:var(--green);">Replied</span></span>
+            </div>
+            <div class="screen-content">
+              <div class="screen-frame phase-call">
+                <div class="call-avatar"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.6"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+                <div class="call-label">Incoming call</div>
+                <div class="call-number">+1 (555) 019‑2231 -John</div>
+                <div class="call-status">● MISSED — SILENT MODE</div>
+                <div class="call-buttons">
+                  <div class="call-btn decline"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg></div>
+                  <div class="call-btn accept"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.99.36 1.97.68 2.91a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.94.32 1.92.55 2.91.68A2 2 0 0 1 22 16.92z"/></svg></div>
+                </div>
+              </div>
+              <div class="screen-frame phase-sending" style="opacity:0;">
+                <div class="sending-card">
+                  <div class="sending-dots"><span></span><span></span><span></span></div>
+                  <p>Sending automatic reply to the missed call number…</p>
+                </div>
+              </div>
+              <div class="screen-frame phase-sms" style="opacity:0;">
+                <div class="sms-header"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> +1 (555) 019‑2231 - John</div>
+                <div class="sms-bubble">John is currently on silent mode and will respond when available - Sent via CallBeacon.</div>
+                <div class="sms-time">Sent sent at 03:45 PM</div>
+                <div class="sms-sent-tag"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg> SMS Reply delivered via - CallBeacon !</div>
+              </div>
+            </div>
+            <div class="phone-sheen"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ADVANTAGE STRIP ============ -->
+<section class="section" style="padding-top:0;padding-bottom:clamp(48px,7vw,80px);">
+  <div class="wrap">
+    <div class="ps-grid reveal-stagger" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr));">
+      <div class="feat-card spot-card" style="padding:22px 22px;">
+        <div class="feat-icon" style="font-size:1.15rem;background:rgba(16,185,129,0.12);">📡</div>
+        <h3>Works without internet</h3>
+        <p>Replies go out as plain SMS over your carrier signal - no Wi-Fi or mobile data required, even in low-signal areas.</p>
+      </div>
+      <div class="feat-card spot-card" style="padding:22px 22px;">
+        <div class="feat-icon" style="font-size:1.15rem;background:rgba(245,158,11,0.12);">🔋</div>
+        <h3>Battery friendly</h3>
+        <p>A lightweight background service designed to sip battery, not drain it - built to run all day without you noticing.</p>
+      </div>
+      <div class="feat-card spot-card" style="padding:22px 22px;">
+        <div class="feat-icon" style="font-size:1.15rem;background:rgba(99,102,241,0.12);">🔒</div>
+        <h3>Privacy-first</h3>
+        <p>Replies are sent directly from your phone to the caller. Nothing routes through outside servers.</p>
+      </div>
+      <div class="feat-card spot-card" style="padding:22px 22px;">
+        <div class="feat-icon" style="font-size:1.15rem;background:rgba(139,92,246,0.12);">⚡</div>
+        <h3>Sent in seconds</h3>
+        <p>Most auto-replies are delivered within 2 seconds of a missed call - before the caller has even put their phone down.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ============ PROBLEM / SOLUTION ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <h2>A missed call shouldn't be a mystery</h2>
+      <p>Every unanswered call leaves the caller with a question. CallBeacon answers it for you.</p>
+    </div>
+    <div class="ps-grid reveal-stagger">
+      <div class="ps-card problem">
+        <span class="ps-tag">● THE PROBLEM</span>
+        <h3>A missed call is a guess.</h3>
+        <p>Driving, in a meeting, your phone on silent, travelling, or simply busy - the person calling doesn't know why you didn't answer. They only know you missed their call. They wait, they wonder, and sometimes that uncertainty turns into worry.</p>
+      </div>
+      <div class="ps-card solution">
+        <span class="ps-tag">● THE FIX</span>
+        <h3>Missed the call, Not the connection.</h3>
+        <p>Life is already full of problems. Don't let a missed call become another one.The moment you can't answer, CallBeacon automatically sends a message explaining why - so the people who care about you don't have to worry, guess, or feel ignored.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MOMENTS / STORYTELLING ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Built for the calls that actually matter</h2>
+      <p>Missed calls aren't all the same. Some are routine. Some mean a parent is starting to worry. CallBeacon was built for the second kind.</p>
+    </div>
+    <div class="moments-grid reveal-stagger">
+      <div class="moment-card spot-card">
+        <span class="moment-tag"><span class="sw" style="background:var(--red);"></span>SILENT MODE</span>
+        <h3>A mother calls. It rings out. She calls again.</h3>
+        <p>Her son is in a lecture, phone face-down. By the second unanswered call, she's not thinking about class schedules anymore — she's thinking about worst cases. That's how it goes for a parent.</p>
+        <div class="moment-reply"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg> "John, is currently on silent mode and will respond when available."</div>
+      </div>
+      <div class="moment-card spot-card">
+        <span class="moment-tag"><span class="sw" style="background:var(--amber);"></span>Driving mode</span>
+        <h3>Checking in on Dad, same time every evening.</h3>
+        <p>One missed call from an elderly parent reads differently than it would from a friend. An adult child who calls to check in every evening notices immediately when that call goes unanswered.</p>
+        <div class="moment-reply"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg> "All good, just in the garden — call you back in 10."</div>
+      </div>
+      <div class="moment-card spot-card">
+        <span class="moment-tag"><span class="sw" style="background:var(--indigo-light);"></span>Scheduled status</span>
+        <h3>The recruiter calls while you're in another interview.</h3>
+        <p>You can't exactly step out to explain. Silence looks like disinterest. A reply sent the moment the call is missed says otherwise, without you touching your phone.</p>
+        <div class="moment-reply"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg> "In an interview right now — I'll call back by 5pm."</div>
+      </div>
+      <div class="moment-card spot-card">
+        <span class="moment-tag"><span class="sw" style="background:var(--green);"></span>Smart replies</span>
+        <h3>A one-person business, one phone, no receptionist.</h3>
+        <p>An electrician mid-job can't answer either. Every unreturned call is a customer one tap away from calling the next name on the list. A reply in seconds is the difference between losing the job and keeping it.</p>
+        <div class="moment-reply"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg> "On a job site, can't talk — back to you within the hour."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="section" id="features">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Everything a missed call needs</h2>
+      <p>Ten small features that add up to callers who are never left wondering.</p>
+    </div>
+    <div class="feat-grid reveal-stagger">
+      <div class="feat-card spot-card">
+        <div class="feat-icon" style="font-size:1.2rem;">📞</div>
+        <h3>Automatic missed call detection</h3>
+        <p>CallBeacon notices every missed call the instant it happens - you never have to open the app for it to work.</p>
+      </div>
+      <div class="feat-card spot-card">
+        <div class="feat-icon" style="font-size:1.2rem;">💬</div>
+        <h3>Smart SMS replies</h3>
+        <p>Sends the right reply for your current status - available, driving, or silent - without you lifting a finger.</p>
+      </div>
+      <div class="feat-card spot-card">
+        <div class="feat-icon" style="font-size:1.2rem;">🌍</div>
+        <h3>Multiple languages</h3>
+        <p>Reply to callers in the language they expect, not just whatever language your phone happens to be set to.</p>
+      </div>
+      <div class="feat-card spot-card">
+        <div class="feat-icon" style="font-size:1.2rem;">⏰</div>
+        <h3>Scheduled status</h3>
+        <p>Set your status ahead of time - meetings, flights, sleep - and CallBeacon switches automatically, on schedule.</p>
+      </div>
+      <div class="feat-card spot-card">
+        <div class="feat-icon" style="font-size:1.2rem;">🚗</div>
+        <h3>Driving mode</h3>
+        <p>Detects motion or a Bluetooth car connection and lets callers know right away that you're on the road.</p>
+      </div>
+      <div class="feat-card spot-card">
+        <div class="feat-icon" style="font-size:1.2rem;">🔕</div>
+        <h3>Silent mode detection</h3>
+        <p>Phone on Do Not Disturb? Callers still hear back from you, even when you never hear your phone ring.</p>
+      </div>
+      <div class="feat-card spot-card">
+        <div class="feat-icon" style="font-size:1.2rem;">📅</div>
+        <h3>Calendar integration</h3>
+        <p>Busy in a meeting on your calendar? CallBeacon can switch your status to match, automatically.</p>
+      </div>
+      <div class="feat-card spot-card">
+        <div class="feat-icon" style="font-size:1.2rem;">🔋</div>
+        <h3>Battery friendly</h3>
+        <p>A lightweight background service built to sip battery, not drain it - runs all day without you noticing.</p>
+      </div>
+      <div class="feat-card spot-card">
+        <div class="feat-icon" style="font-size:1.2rem;">👤</div>
+        <h3>Contacts-only mode</h3>
+        <p>Auto-reply only to people already saved in your contacts - unknown numbers and spam callers are left alone.</p>
+      </div>
+      <div class="feat-card spot-card">
+        <div class="feat-icon" style="font-size:1.2rem;">📊</div>
+        <h3>Call history</h3>
+        <p>See who called, when, and exactly what CallBeacon told them - all logged in one place.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section" id="how-it-works">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>How it works</h2>
+      <p>Five steps, and the first missed call after that handles itself.</p>
+    </div>
+    <div class="timeline reveal">
+      <div class="timeline-item">
+        <div class="timeline-node">01</div>
+        <div class="timeline-content"><h3>Install APK</h3><p>Download the file below and install it on your Android device.</p></div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-node">02</div>
+        <div class="timeline-content">
+          <h3>Grant permissions</h3>
+          <p>Allow call log, SMS, and contacts access - CallBeacon explains exactly why for each one.</p>
+          <div class="step-callout">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            <span>Android 13+ blocks SMS access by default for sideloaded apps. <a href="#restricted-settings">See the 1-minute fix</a>.</span>
+          </div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-node">03</div>
+        <div class="timeline-content"><h3>Set your status</h3><p>Choose Available, Driving, or Silent - or schedule status changes ahead of time.</p></div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-node">04</div>
+        <div class="timeline-content"><h3>Receive a missed call</h3><p>Go about your day. CallBeacon watches quietly in the background.</p></div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-node">05</div>
+        <div class="timeline-content"><h3>Automatic SMS reply</h3><p>The caller gets an instant reply, written by you, sent by CallBeacon.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCREENSHOTS / DEMO ============ -->
+<section class="section" id="screenshots">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <h2>See CallBeacon in action</h2>
+      <p class="tour-note">A quick tour of the three screens you'll actually use day to day.</p>
+    </div>
+    <div class="tour-grid reveal-stagger">
+      <div class="tour-card">
+        <div class="screenshot-phone">
+          <div class="screenshot-phone-frame">
+            <div class="screenshot-phone-inner">
+              <div class="screenshot-phone-camera"></div>
+              <img src="assets/Home_Screen.jpeg" alt="CallBeacon home screen showing Silent mode active, quick status presets, and today's missed call, SMS sent, and streak stats">
+              <div class="screenshot-phone-sheen"></div>
+            </div>
+          </div>
+        </div>
+        <h3>Home &amp; status</h3>
+        <p class="caption">See your active status, switch modes in one tap, and track today's stats at a glance.</p>
+      </div>
+      <div class="tour-card">
+        <div class="screenshot-phone">
+          <div class="screenshot-phone-frame">
+            <div class="screenshot-phone-inner">
+              <div class="screenshot-phone-camera"></div>
+              <img src="assets/Call_Log.jpeg" alt="CallBeacon call log showing missed calls with SMS sent confirmations and a callback request button for each contact">
+              <div class="screenshot-phone-sheen"></div>
+            </div>
+          </div>
+        </div>
+        <h3>Call log</h3>
+        <p class="caption">Every missed call, whether the reply sent successfully, and a one-tap callback request.</p>
+      </div>
+      <div class="tour-card">
+        <div class="screenshot-phone">
+          <div class="screenshot-phone-frame">
+            <div class="screenshot-phone-inner">
+              <div class="screenshot-phone-camera"></div>
+              <img src="assets/Set_Status.jpeg" alt="CallBeacon set status screen showing SMS tone options, a live reply preview, and auto-clear timing">
+              <div class="screenshot-phone-sheen"></div>
+            </div>
+          </div>
+        </div>
+        <h3>Set status</h3>
+        <p class="caption">Pick a tone, preview the exact reply, and set when the status should auto-clear.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PERMISSIONS ============ -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Why CallBeacon asks for what it asks for</h2>
+      <p>No permission is required just to have it. Here's exactly what each one is used for.</p>
+    </div>
+    <div class="perm-banner reveal">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+      <p>Installed the APK and see <em>"App was denied access to SMS"</em>? That's normal on Android 13+ — <a href="#restricted-settings">jump to the fix</a>.</p>
+    </div>
+    <div class="perm-list reveal">
+      <div class="perm-row">
+        <div class="perm-name">SMS</div>
+        <div class="perm-desc">CallBeacon sends the auto-reply text on your behalf. Without it, CallBeacon can see that a call was missed but can't respond to it.</div>
+      </div>
+      <div class="perm-row">
+        <div class="perm-name">Call log</div>
+        <div class="perm-desc">Used to notice missed calls the instant they happen, so the reply goes out in seconds, not minutes.</div>
+      </div>
+      <div class="perm-row">
+        <div class="perm-name">Contacts</div>
+        <div class="perm-desc">Looks up the caller's name so replies can feel personal instead of going out to a raw phone number.</div>
+      </div>
+      <div class="perm-row">
+        <div class="perm-name">Notifications</div>
+        <div class="perm-desc">Lets CallBeacon confirm when a reply was sent, and alert you if one failed to go through.</div>
+      </div>
+      <div class="perm-row">
+        <div class="perm-name">Battery optimization</div>
+        <div class="perm-desc">Keeps the background service running, so a missed call is never picked up too late to reply.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RESTRICTED SETTINGS FIX ============ -->
+<section class="section fix-section" id="restricted-settings">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Seeing "App was denied access to SMS"?</h2>
+      <p>That message isn't CallBeacon failing — it's Android protecting you from sideloaded apps by default. It takes one extra step to allow, and then it's done for good.</p>
+    </div>
+    <div class="fix-intro reveal">
+      <div class="error-recreation">
+        <span class="caption-label">What you're seeing</span>
+        <div class="error-shield"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h4>App was denied access to SMS</h4>
+        <p>The app requested access to a sensitive permission which can put your personal and financial info at risk.</p>
+        <p>It's possible that the app won't work properly without this restricted permission.</p>
+      </div>
+      <div>
+        <h3 style="font-size:1.3rem;margin-bottom:14px;">Why this happens</h3>
+        <p style="color:var(--text-dim);margin-bottom:14px;">Starting with Android 13, the system automatically restricts sensitive permissions — SMS, accessibility, notification access — for any app installed outside the Play Store. It's a built-in safeguard against malware, and it applies to every sideloaded app, not just CallBeacon.</p>
+        <p style="color:var(--text-dim);">Turning it off for CallBeacon takes under a minute, and you only have to do it once.</p>
+      </div>
+    </div>
+    <div class="fix-steps reveal-stagger">
+      <div class="fix-step spot-card">
+        <div class="fix-step-num">1</div>
+        <h4>Open CallBeacon's app info</h4>
+        <p>Go to <strong style="color:var(--text);">Settings → Apps → CallBeacon.</strong> Or press and hold the CallBeacon icon and tap the "i" info button.</p>
+        <div class="mock-settings-row"><span>CallBeacon</span><span class="menu-dots">⋮</span></div>
+      </div>
+      <div class="fix-step spot-card">
+        <div class="fix-step-num">2</div>
+        <h4>Tap the menu, then allow restricted settings</h4>
+        <p>In the top-right corner, tap the three-dot menu and choose <strong style="color:var(--text);">"Allow restricted settings."</strong> Confirm with your PIN, pattern, or fingerprint if asked.</p>
+        <div class="mock-dropdown"><div>Uninstall for all users</div><div class="highlight">Allow restricted settings</div><div>App info in bundle</div></div>
+      </div>
+      <div class="fix-step spot-card">
+        <div class="fix-step-num">3</div>
+        <h4>Grant SMS permission again</h4>
+        <p>Reopen CallBeacon, and grant SMS access when it's requested. It will go through cleanly this time.</p>
+        <div class="mock-toggle-row"><span>SMS permission</span><div class="mock-toggle"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRUST & SECURITY ============ -->
+<section class="section" id="security">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Don't take our word for it — scan it yourself</h2>
+      <p>CallBeacon is distributed outside the Play Store, so it's fair to want proof before you install anything. Here's how to check the exact file you downloaded.</p>
+    </div>
+    <div class="fix-intro reveal" style="margin-bottom:32px;">
+      <div class="error-recreation" style="box-shadow:0 24px 60px -24px rgba(16,185,129,0.15);">
+        <span class="caption-label">Free & independent</span>
+        <div class="error-shield" style="background:rgba(16,185,129,0.14);color:var(--green);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h4>Scan the APK on VirusTotal</h4>
+        <p>VirusTotal checks a file against 60+ antivirus engines at once and is free to use, with no account required. It's the same tool security researchers reach for first.</p>
+        <a href="https://www.virustotal.com/gui/home/upload" target="_blank" rel="noopener" class="btn btn-primary" style="margin-top:8px;width:100%;justify-content:center;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          Open VirusTotal
+        </a>
+      </div>
+      <div>
+        <h3 style="font-size:1.3rem;margin-bottom:14px;">Why one engine may still flag it</h3>
+        <p style="color:var(--text-dim);margin-bottom:14px;">If you scan CallBeacon, you may see it flagged by a single engine under a generic name like <em>"Trojan-SMS.AndroidOS.Agent."</em> That's not a sign of hidden malware — it's a known heuristic pattern. Actual SMS-fraud malware and a legitimate SMS-automation app both request the exact same Android permissions (SMS + call log), so a handful of scanners flag the permission combination itself rather than anything the code actually does.</p>
+        <p style="color:var(--text-dim);">Apps on the Play Store rarely trigger this because they carry a store reputation signal these engines trust. A sideloaded APK doesn't have that history yet, which is exactly why we're pointing you to an independent scanner instead of asking you to just trust us.</p>
+      </div>
+    </div>
+    <div class="perm-banner reveal" style="background:rgba(16,185,129,0.08);border-color:rgba(16,185,129,0.25);">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <p style="color:#6EE7B7;">We test each release against VirusTotal before publishing it here. Found something that concerns you? <a href="mailto:adarsh.ks.tech@gmail.com" style="color:#fff;">Email us</a> and we'll look into it directly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ADVERTISEMENT ============
+<section class="section" style="padding-top:0;">
+  <div class="wrap">
+    <div class="ad-slot">
+      <span class="ad-label">Advertisement</span>
+      <div class="ad-inner">Ad space — 728×90 / responsive native slot</div>
+    </div>
+  </div>
+</section> -->
+
+<!-- ============ FAQ ============ -->
+<section class="section" id="faq">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Frequently asked questions</h2>
+      <p>Troubleshooting, permissions, and the questions that come up most.</p>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item open">
+        <button class="faq-q"><span>Android says CallBeacon was "denied access to SMS." What do I do?</span><span class="plus">+</span></button>
+        <div class="faq-a" style="max-height:200px;"><p>This is Android's restricted settings protection for apps installed outside the Play Store — not a bug in CallBeacon. Go to <strong>Settings → Apps → CallBeacon → ⋮ menu → Allow restricted settings</strong>, then reopen the app and grant SMS access again. <a href="#restricted-settings">Full walkthrough above ↑</a></p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Is the APK actually safe? An antivirus app flagged it.</span><span class="plus">+</span></button>
+        <div class="faq-a"><p>You can verify this yourself for free on <a href="https://www.virustotal.com/gui/home/upload" target="_blank" rel="noopener">VirusTotal</a>, which scans a file against 60+ engines at once. A single engine occasionally flags sideloaded SMS-utility apps under a generic "SMS Trojan" heuristic — this happens because real SMS malware and legitimate SMS automation request the same Android permissions, and the engine can't tell them apart without the reputation history a Play Store listing carries. <a href="#security">More detail above ↑</a></p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Does CallBeacon read my messages?</span><span class="plus">+</span></button>
+        <div class="faq-a"><p>No. CallBeacon only sends the auto-reply you've written — it doesn't read your existing SMS conversations or call recordings.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Will sending auto-replies cost me anything?</span><span class="plus">+</span></button>
+        <div class="faq-a"><p>CallBeacon sends replies as a regular SMS text message through your carrier, so standard SMS rates from your plan apply just as if you'd typed and sent it yourself. Most modern plans include unlimited texting, but it's worth checking your plan if you're on a pay-per-text rate.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Will this drain my battery?</span><span class="plus">+</span></button>
+        <div class="faq-a"><p>CallBeacon runs a lightweight background service, so it needs to be excluded from aggressive battery optimization to stay awake. That exception is requested once during setup and has a minimal effect on battery life.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>I granted every permission, but replies still aren't sending. What now?</span><span class="plus">+</span></button>
+        <div class="faq-a"><p>Check three things: SMS permission is still allowed under the app's settings, CallBeacon is excluded from battery optimization, and a status with a saved template is currently active. Most delivery issues trace back to one of these — restricted settings being blocked is the most common cause.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Which Android versions are supported?</span><span class="plus">+</span></button>
+        <div class="faq-a"><p>CallBeacon requires Android 8.0 (Oreo) or newer — that covers the large majority of Android devices in use today.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Is CallBeacon free?</span><span class="plus">+</span></button>
+        <div class="faq-a"><p>Yes. The APK on this page is free to download and install, no account required.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Why isn't the app on the Play Store?</span><span class="plus">+</span></button>
+        <div class="faq-a"><p>CallBeacon is currently distributed directly as an APK. You'll need to allow "install from unknown sources" for your browser once — full steps are in the download section below.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Does it work with dual SIM phones?</span><span class="plus">+</span></button>
+        <div class="faq-a"><p>Yes — CallBeacon detects missed calls across both SIM slots and replies from the same line the call came in on.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DOWNLOAD ============ -->
+<section class="section" id="download">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Download CallBeacon</h2>
+      <p>Install directly — no store, no account, no waiting on a review queue.</p>
+    </div>
+    <div class="dl-card reveal">
+      <div>
+        <div class="dl-specs">
+          <div><div class="dl-spec-label">Version</div><div class="dl-spec-val">1.0.0</div></div>
+          <div><div class="dl-spec-label">APK size</div><div class="dl-spec-val">6.4 MB</div></div>
+          <div><div class="dl-spec-label">Requires</div><div class="dl-spec-val">Android 8.0+</div></div>
+        </div>
+        <p class="release-notes"><strong>Release notes — v1.0.0:</strong> Initial public release. Automatic missed-call detection, custom SMS reply templates, Driving and Silent modes, scheduled status changes, and call history with delivery status.</p>
+        <p style="font-size:0.82rem;color:var(--text-dim);margin-top:18px;max-width:480px;">Installing from outside the Play Store? Enable <em>"Install unknown apps"</em> for your browser under Settings → Security, then open the downloaded file.</p>
+        <p class="dl-android-note">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          On Android 13+, SMS access needs one extra step. <a href="#restricted-settings">See how →</a>
+        </p>
+        <p class="dl-android-note">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Want to verify the file first? <a href="#security">Scan it on VirusTotal →</a>
+        </p>
+      </div>
+      <a href="downloads/CallBeacon-v1.0.0.apk" download="CallBeacon.apk" class="btn btn-primary" style="white-space:nowrap;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0 0l-5-5m5 5l5-5M4 21h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Download APK (6.4 MB)
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABOUT DEVELOPER / CONTACT ============ -->
+<section class="section" id="contact">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="reveal">
+        <div class="section-head" style="margin-bottom:24px;">
+          <h2>About CallBeacon</h2>
+        </div>
+        <p>CallBeacon is built around one idea: a missed call shouldn't leave anyone guessing. It runs quietly in the background of your Android phone, watching for missed calls and answering them the way you would, if you'd had the chance.</p>
+        <p>It's built and maintained independently by a small team focused on exactly one problem — making the moment after a missed call less anxious for everyone involved. No bloat, no unrelated features, just a beacon that speaks for you when you can't.</p>
+      </div>
+      <div class="about-card reveal">
+        <h3>Get in touch</h3>
+        <div class="contact-row">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 6l-10 7L2 6"/><path d="M2 6h20v12H2z"/></svg>
+          <a href="mailto:adarsh.ks.tech@gmail.com">adarsh.ks.tech@gmail.com</a>
+        </div>
+        <div class="contact-row">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+          <a href="https://github.com/Adarsh0414" target="_blank" rel="noopener">github.com/Adarsh0414</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="brand">
+        <svg viewBox="0 0 108 108" width="26" height="26" fill="none"><circle cx="54" cy="54" r="20" fill="#4F46E5"/><circle cx="54" cy="54" r="9" fill="#E2E8F0"/><path d="M67,41 Q76,54 67,67" stroke="#818CF8" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M73,35 Q85,54 73,73" stroke="#6366F1" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+        CallBeacon
+      </div>
+      <div class="foot-links">
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="foot-social">
+        <a href="https://github.com/Adarsh0414" target="_blank" rel="noopener" aria-label="GitHub"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a>
+        <a href="mailto:adarsh.ks.tech@gmail.com" aria-label="Email"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 6l-10 7L2 6"/><path d="M2 6h20v12H2z"/></svg></a>
+      </div>
+    </div>
+    <div class="divider" style="margin-bottom:20px;"></div>
+    <div class="foot-bottom">
+      <span>© 2026 CallBeacon. All rights reserved.</span>
+      <span>Made for Android · v1.0.0</span>
+    </div>
+    <div class="foot-bottom" style="margin-top:10px;">
+      <span>Built in India 🇮🇳 Made with ❤️ by Adarsh Singh.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Nav scroll state
+  const navShell = document.getElementById('navShell');
+  window.addEventListener('scroll', () => {
+    navShell.classList.toggle('scrolled', window.scrollY > 12);
+  }, { passive:true });
+
+  // Mobile menu toggle
+  const burger = document.getElementById('burger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  burger.addEventListener('click', () => {
+    const isOpen = mobileMenu.classList.toggle('open');
+    burger.classList.toggle('open', isOpen);
+    burger.setAttribute('aria-expanded', isOpen);
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    burger.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+  }));
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const q = item.querySelector('.faq-q');
+    const a = item.querySelector('.faq-a');
+    q.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(open => {
+        if (open !== item) { open.classList.remove('open'); open.querySelector('.faq-a').style.maxHeight = null; }
+      });
+      if (isOpen) { item.classList.remove('open'); a.style.maxHeight = null; }
+      else { item.classList.add('open'); a.style.maxHeight = a.scrollHeight + 'px'; }
+    });
+  });
+
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal, .reveal-stagger');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+  revealEls.forEach(el => io.observe(el));
+
+  // Nav scroll-spy
+  const navLinks = document.querySelectorAll('#navLinks a[data-nav]');
+  const sections = Array.from(navLinks).map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const id = '#' + entry.target.id;
+      const link = document.querySelector(`#navLinks a[href="${id}"]`);
+      if (!link) return;
+      if (entry.isIntersecting) { navLinks.forEach(l => l.classList.remove('active')); link.classList.add('active'); }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px' });
+  sections.forEach(s => spy.observe(s));
+
+  // Cursor spotlight on cards
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduceMotion) {
+    document.querySelectorAll('.spot-card').forEach(card => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+        card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+      });
+    });
+
+    // Phone tilt parallax (desktop pointer only)
+    if (window.matchMedia('(pointer: fine)').matches) {
+      const stage = document.getElementById('phoneStage');
+      const tilt = document.getElementById('phoneTilt');
+      if (stage && tilt) {
+        stage.addEventListener('mousemove', (e) => {
+          const r = stage.getBoundingClientRect();
+          const px = (e.clientX - r.left) / r.width - 0.5;
+          const py = (e.clientY - r.top) / r.height - 0.5;
+          const ry = px * 12;
+          const rx = -py * 12;
+          tilt.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+        });
+        stage.addEventListener('mouseleave', () => {
+          tilt.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
+        });
+      }
+    }
+  }
+</script>
+</body>
+</html>
