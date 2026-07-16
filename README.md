@@ -27,21 +27,19 @@ CallBeacon is a native Android application that automatically sends personalized
 <b>📋 Set Status</b><br><br>
 <img src="screenshots/set-status.jpeg" width="180">
 </td>
-</tr>
 
-<tr>
 <td align="center">
 <b>📅 Schedule Status</b><br><br>
 <img src="screenshots/schedule-status.jpeg" width="180">
 </td>
+</tr>
 
+<tr>
 <td align="center">
 <b>📊 Activity Screen</b><br><br>
 <img src="screenshots/activity-screen.jpeg" width="180">
 </td>
-</tr>
 
-<tr>
 <td align="center">
 <b>⚙️ Settings</b><br><br>
 <img src="screenshots/setting-page.jpeg" width="180">
